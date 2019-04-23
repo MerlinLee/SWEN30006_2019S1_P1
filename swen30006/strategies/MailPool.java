@@ -67,23 +67,95 @@ public class MailPool implements IMailPool {
 	}
 	
 	private void loadRobot(ListIterator<Robot> i) throws ItemTooHeavyException {
-		Robot robot = i.next();
-		assert(robot.isEmpty());
-		// System.out.printf("P: %3d%n", pool.size());
+		//Robot robot = i.next();
+		//assert(robot.isEmpty());
+		//System.out.printf("P: %3d%n", pool.size());
 		ListIterator<Item> j = pool.listIterator();
 		if (pool.size() > 0) {
-			try {
-			robot.addToHand(j.next().mailItem); // hand first as we want higher priority delivered first
-			j.remove();
-			if (pool.size() > 0) {
-				robot.addToTube(j.next().mailItem);
-				j.remove();
+			// Check the weight of mail item
+			// The mail item just needs one robot
+			if(pool.getFirst().mailItem.getWeight() <= 2000) {
+				Robot robot1 = i.next();
+				assert(robot1.isEmpty());
+				try {
+					robot1.addToHand(j.next().mailItem); // hand first as we want higher priority delivered first
+					j.remove();
+					if (pool.size() > 0) {
+						robot1.addToTube(j.next().mailItem);
+						j.remove();
+					}
+					robot1.dispatch(); // send the robot off if it has any items to deliver
+					i.remove();       // remove from mailPool queue
+					} catch (Exception e) { 
+			            throw e; 
+			        }
 			}
-			robot.dispatch(); // send the robot off if it has any items to deliver
-			i.remove();       // remove from mailPool queue
-			} catch (Exception e) { 
-	            throw e; 
-	        } 
+			// The mail item needs two robots
+			else if(pool.getFirst().mailItem.getWeight() <= 2600) {
+				if(robots.size()>1) {
+					MailItem mailItem2 = j.next().mailItem;
+					Robot robot1 = i.next();
+					i.remove();
+					Robot robot2 = i.next();
+					i.remove();
+					assert(robot1.isEmpty());
+					assert(robot2.isEmpty());
+					try {
+						robot1.addToHand(mailItem2);
+						robot2.addToHand(mailItem2);
+						j.remove();
+						robot1.dispatch();
+						robot2.dispatch();
+					}catch(Exception e) {
+						robots.add(robot1);
+						robots.add(robot2);
+						throw e;
+					}
+				}else {
+					i.next();
+				}
+			}
+			// The mail item needs three robots
+			else if(pool.getFirst().mailItem.getWeight() <= 3000) {
+				if(robots.size()>2) {
+					MailItem mailItem3 = j.next().mailItem;
+					Robot robot1 = i.next();
+					i.remove();
+					Robot robot2 = i.next();
+					i.remove();
+					Robot robot3 = i.next();
+					i.remove();
+					assert(robot1.isEmpty());
+					assert(robot2.isEmpty());
+					assert(robot3.isEmpty());
+					
+					try {
+						robot1.addToHand(mailItem3);
+						robot2.addToHand(mailItem3);
+						robot3.addToHand(mailItem3);
+						j.remove();
+						robot1.dispatch();
+						robot2.dispatch();
+						robot3.dispatch();
+					}catch(Exception e) {
+						robots.add(robot1);
+						robots.add(robot2);
+						robots.add(robot3);
+						throw e;
+					}
+				}else {
+					i.next();
+				}
+			}
+			else {
+				try {
+					throw new ItemTooHeavyException();
+				}catch(Exception e) {
+					throw e;
+				}
+			}
+		}else {
+			i.next();
 		}
 	}
 
