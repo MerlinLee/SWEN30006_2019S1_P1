@@ -16,19 +16,19 @@ public class Robot {
     static public final int TRIPLE_MAX_WEIGHT = 3000;
 
     IMailDelivery delivery;
-    protected final String id;
+    protected String id;
     /** Possible states the robot can be in */
     public enum RobotState { DELIVERING, WAITING, RETURNING }
     public RobotState current_state;
-    private int current_floor;
-    private int destination_floor;
-    private IMailPool mailPool;
-    private boolean receivedDispatch;
+    protected int current_floor;
+    protected int destination_floor;
+    protected IMailPool mailPool;
+    protected boolean receivedDispatch;
     
-    private MailItem deliveryItem = null;
-    private MailItem tube = null;
+    protected MailItem deliveryItem = null;
+    protected MailItem tube = null;
     
-    private int deliveryCounter;
+    protected int deliveryCounter;
     
 
     /**
@@ -46,6 +46,13 @@ public class Robot {
         this.delivery = delivery;
         this.mailPool = mailPool;
         this.receivedDispatch = false;
+        this.deliveryCounter = 0;
+    }
+    
+    public Robot() {
+    	current_state = RobotState.WAITING;
+    	current_floor = Building.MAILROOM_LOCATION;
+    	this.receivedDispatch = false;
         this.deliveryCounter = 0;
     }
     
@@ -88,7 +95,10 @@ public class Robot {
     		case DELIVERING:
     			if(current_floor == destination_floor){ // If already here drop off either way
                     /** Delivery complete, report this to the simulator! */
-                    delivery.deliver(deliveryItem);
+    				if(!deliveryItem.isDeliveryed) {
+    					delivery.deliver(deliveryItem);
+    				}
+                    //delivery.deliver(deliveryItem);
                     deliveryItem = null;
                     deliveryCounter++;
                     if(deliveryCounter > 2){  // Implies a simulation bug
@@ -116,7 +126,7 @@ public class Robot {
     /**
      * Sets the route for the robot
      */
-    private void setRoute() {
+    protected void setRoute() {
         /** Set the destination floor */
         destination_floor = deliveryItem.getDestFloor();
     }
@@ -125,7 +135,7 @@ public class Robot {
      * Generic function that moves the robot towards the destination
      * @param destination the floor towards which the robot is moving
      */
-    private void moveTowards(int destination) {
+    protected void moveTowards(int destination) {
         if(current_floor < destination){
             current_floor++;
         } else {
@@ -133,7 +143,7 @@ public class Robot {
         }
     }
     
-    private String getIdTube() {
+    protected String getIdTube() {
     	return String.format("%s(%1d)", id, (tube == null ? 0 : 1));
     }
     
@@ -141,7 +151,7 @@ public class Robot {
      * Prints out the change in state
      * @param nextState the state to which the robot is transitioning
      */
-    private void changeState(RobotState nextState){
+    protected void changeState(RobotState nextState){
     	assert(!(deliveryItem == null && tube != null));
     	if (current_state != nextState) {
             System.out.printf("T: %3d > %7s changed from %s to %s%n", Clock.Time(), getIdTube(), current_state, nextState);
@@ -156,8 +166,8 @@ public class Robot {
 		return tube;
 	}
     
-	static private int count = 0;
-	static private Map<Integer, Integer> hashMap = new TreeMap<Integer, Integer>();
+	static protected int count = 0;
+	static protected Map<Integer, Integer> hashMap = new TreeMap<Integer, Integer>();
 
 	@Override
 	public int hashCode() {
@@ -174,13 +184,13 @@ public class Robot {
 	public void addToHand(MailItem mailItem) throws ItemTooHeavyException {
 		assert(deliveryItem == null);
 		deliveryItem = mailItem;
-		if (deliveryItem.weight > INDIVIDUAL_MAX_WEIGHT) throw new ItemTooHeavyException();
+		//if (deliveryItem.weight > INDIVIDUAL_MAX_WEIGHT) throw new ItemTooHeavyException();
 	}
 
 	public void addToTube(MailItem mailItem) throws ItemTooHeavyException {
 		assert(tube == null);
 		tube = mailItem;
-		if (tube.weight > INDIVIDUAL_MAX_WEIGHT) throw new ItemTooHeavyException();
+		//if (tube.weight > INDIVIDUAL_MAX_WEIGHT) throw new ItemTooHeavyException();
 	}
 
 }
