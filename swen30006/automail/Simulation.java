@@ -120,7 +120,7 @@ public class Simulation {
     		if(!MAIL_DELIVERED.contains(deliveryItem)){
     			deliveryItem.isDeliveryed=true;
     			MAIL_DELIVERED.add(deliveryItem);
-                System.out.printf("T: %3d > Delivered(%4d) [%s]%n", Clock.Time(), MAIL_DELIVERED.size(), deliveryItem.toString());
+                System.out.printf("T: %3d > Delivered(%d) [%s]%n", Clock.Time(), MAIL_DELIVERED.size(), deliveryItem.toString());
     			// Calculate delivery score
     			total_score += calculateDeliveryScore(deliveryItem);
     		}
