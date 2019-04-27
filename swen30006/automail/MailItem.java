@@ -18,6 +18,8 @@ public class MailItem {
     protected final int arrival_time;
     /** The weight in grams of the mail item */
     protected final int weight;
+    
+    public boolean isDeliveryed = false;
 
     /**
      * Constructor for a MailItem
