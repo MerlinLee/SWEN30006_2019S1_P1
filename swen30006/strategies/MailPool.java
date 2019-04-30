@@ -7,6 +7,8 @@ import java.util.ListIterator;
 import automail.MailItem;
 import automail.PriorityMailItem;
 import automail.Robot;
+import automail.RobotSimpleFactory;
+import automail.SuperRobot;
 import exceptions.ItemTooHeavyException;
 
 public class MailPool implements IMailPool {
@@ -42,12 +44,12 @@ public class MailPool implements IMailPool {
 	}
 	
 	private LinkedList<Item> pool;
-	private LinkedList<Robot> robots;
+	private LinkedList<SuperRobot> robots;
 
 	public MailPool(int nrobots){
 		// Start empty
 		pool = new LinkedList<Item>();
-		robots = new LinkedList<Robot>();
+		robots = new LinkedList<SuperRobot>();
 	}
 
 	public void addToPool(MailItem mailItem) {
@@ -59,37 +61,37 @@ public class MailPool implements IMailPool {
 	@Override
 	public void step() throws ItemTooHeavyException {
 		try{
-			ListIterator<Robot> i = robots.listIterator();
+			ListIterator<SuperRobot> i = robots.listIterator();
 			while (i.hasNext()) loadRobot(i);
 		} catch (Exception e) { 
             throw e; 
         } 
 	}
 	
-	private void loadRobot(ListIterator<Robot> i) throws ItemTooHeavyException {
-		Robot robot = i.next();
-		assert(robot.isEmpty());
-		// System.out.printf("P: %3d%n", pool.size());
+	private void loadRobot(ListIterator<SuperRobot> i) throws ItemTooHeavyException {
 		ListIterator<Item> j = pool.listIterator();
 		if (pool.size() > 0) {
-			try {
-			robot.addToHand(j.next().mailItem); // hand first as we want higher priority delivered first
-			j.remove();
-			if (pool.size() > 0) {
-				robot.addToTube(j.next().mailItem);
+			MailItem mailItem = j.next().mailItem;
+			SuperRobot superRobot = RobotSimpleFactory.productRobot(i,mailItem,robots);
+			if(superRobot!=null) {
+				superRobot.addToHand(mailItem);
 				j.remove();
+				
+				if(superRobot instanceof Robot && pool.size() > 0) {
+					superRobot.addToTube(j.next().mailItem);
+					j.remove();
+				}
+				superRobot.dispatch();
 			}
-			robot.dispatch(); // send the robot off if it has any items to deliver
-			i.remove();       // remove from mailPool queue
-			} catch (Exception e) { 
-	            throw e; 
-	        } 
+		}else {
+			i.next();
 		}
 	}
 
 	@Override
-	public void registerWaiting(Robot robot) { // assumes won't be there already
+	public void registerWaiting(SuperRobot robot) { // assumes won't be there already
 		robots.add(robot);
 	}
+
 
 }
