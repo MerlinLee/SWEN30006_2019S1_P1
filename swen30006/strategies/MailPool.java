@@ -72,11 +72,14 @@ public class MailPool implements IMailPool {
 		ListIterator<Item> j = pool.listIterator();
 		if (pool.size() > 0) {
 			MailItem mailItem = j.next().mailItem;
+			
+			// Using factory pattern to decide and product appropriate robot or team to delivery
 			SuperRobot superRobot = RobotSimpleFactory.productRobot(i,mailItem,robots);
 			if(superRobot!=null) {
 				superRobot.addToHand(mailItem);
 				j.remove();
 				
+				// If using individual robot to delivery, it needs to add mail item to its tube
 				if(superRobot instanceof Robot && pool.size() > 0) {
 					superRobot.addToTube(j.next().mailItem);
 					j.remove();
