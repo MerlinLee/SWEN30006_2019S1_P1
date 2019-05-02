@@ -1,5 +1,7 @@
 package automail;
-
+/**
+ * SuperRobot is an abstract base class of robot and team
+ */
 import java.util.Map;
 import java.util.TreeMap;
 

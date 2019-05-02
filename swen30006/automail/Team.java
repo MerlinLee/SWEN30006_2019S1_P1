@@ -4,8 +4,7 @@ import exceptions.ItemTooHeavyException;
 import strategies.Automail;
 
 /**
- * @author Tom
- * The team of robots
+ * The team of robots may contain two or three robots to delivery heavier mail items
  */
 public class Team extends SuperRobot{
 	protected SuperRobot[] teamOfRobots;
@@ -27,6 +26,7 @@ public class Team extends SuperRobot{
 		
 	}
 	
+	// The speed of team is one third of individual robot
 	protected void moveTowards(int destination) {
 		if(time==4) {
 			time = 1;
@@ -56,6 +56,7 @@ public class Team extends SuperRobot{
     	}
     }
 	
+	// Add the mail item to the team and execute the same operation to every robots of the team
 	public void addToHand(MailItem mailItem) throws ItemTooHeavyException {
 		deliveryItem = mailItem;
 		destination_floor = mailItem.destination_floor;
@@ -64,12 +65,14 @@ public class Team extends SuperRobot{
     	}
 	}
 	
+	// Dispatch the team from mail pool and execute the same operation to the every robots of the team
 	public void dispatch() {
 		for(int i=0;i<teamOfRobots.length;i++) {
     		teamOfRobots[i].dispatch();
     	}
     }
 	
+	// When the mail item is delivered, the team will release all robots and add robots to the list of robot 
 	private void releaseRobots() {
 		for(SuperRobot robot : teamOfRobots) {
 			robot.deliveryItem = null;
