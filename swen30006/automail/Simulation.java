@@ -91,7 +91,7 @@ public class Simulation {
         }
         Integer seed = seedMap.get(true);
         System.out.printf("Seed: %s%n", seed == null ? "null" : seed.toString());
-        Automail automail = new Automail(mailPool, new ReportDelivery(), robots);
+        Automail automail = Automail.getInstance(mailPool, new ReportDelivery(), robots);
         MailGenerator mailGenerator = new MailGenerator(MAIL_TO_CREATE, MAIL_MAX_WEIGHT, automail.mailPool, seedMap);
         
         /** Initiate all the mail */
@@ -102,7 +102,11 @@ public class Simulation {
             mailGenerator.step();
             try {
                 automail.mailPool.step();
-				for (int i=0; i<robots; i++) automail.robots[i].step();
+				for (int i=0; i<robots; i++) {
+					if(automail.robots[i]!=null) {
+						automail.robots[i].step();
+					}
+				}
 			} catch (ExcessiveDeliveryException|ItemTooHeavyException e) {
 				e.printStackTrace();
 				System.out.println("Simulation unable to complete.");
@@ -118,6 +122,7 @@ public class Simulation {
     	/** Confirm the delivery and calculate the total score */
     	public void deliver(MailItem deliveryItem){
     		if(!MAIL_DELIVERED.contains(deliveryItem)){
+    			deliveryItem.isDeliveryed=true;
     			MAIL_DELIVERED.add(deliveryItem);
                 System.out.printf("T: %3d > Delivered(%4d) [%s]%n", Clock.Time(), MAIL_DELIVERED.size(), deliveryItem.toString());
     			// Calculate delivery score
